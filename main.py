@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from digest import create_digest
+from digest import create_digest, send_telegram
 from search import search_google_news
 
 
@@ -21,6 +21,11 @@ def main() -> None:
         action="store_true",
         help="Print the Google News leads instead of generating a Gemini draft.",
     )
+    parser.add_argument(
+        "--send",
+        action="store_true",
+        help="Send the completed digest to Telegram.",
+    )
     args = parser.parse_args()
     results = search_google_news(args.query)
 
@@ -31,7 +36,10 @@ def main() -> None:
             print()
         return
 
-    print(create_digest(results))
+    digest = create_digest(results)
+    print(digest)
+    if args.send:
+        send_telegram(digest)
 
 
 if __name__ == "__main__":

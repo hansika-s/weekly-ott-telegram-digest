@@ -50,3 +50,25 @@ Google News leads:
     if not text:
         raise RuntimeError("Gemini returned no digest text.")
     return text
+
+
+def send_telegram(text: str) -> None:
+    """Send a completed digest to the configured Telegram chat."""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    if not token or not chat_id:
+        raise RuntimeError(
+            "Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID before sending to Telegram."
+        )
+
+    request = urllib.request.Request(
+        f"https://api.telegram.org/bot{token}/sendMessage",
+        data=json.dumps({"chat_id": chat_id, "text": text}).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        result = json.loads(response.read())
+
+    if not result.get("ok"):
+        raise RuntimeError("Telegram did not accept the digest.")

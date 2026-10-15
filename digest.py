@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import os
 from datetime import date, timedelta
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -60,8 +62,17 @@ Google News leads:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=60) as response:
-        data = json.loads(response.read())
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                data = json.loads(response.read())
+            break
+        except urllib.error.HTTPError as error:
+            if error.code != 429 or attempt == 2:
+                raise RuntimeError(
+                    f"Gemini request failed with HTTP {error.code}. Check the API key's model access and quota."
+                ) from error
+            time.sleep(10 * (attempt + 1))
 
     parts = data["candidates"][0]["content"]["parts"]
     text = "".join(part.get("text", "") for part in parts).strip()

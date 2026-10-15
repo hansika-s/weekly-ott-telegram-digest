@@ -20,9 +20,10 @@ on a personal computer being on.
 
 ## Run locally
 
-Python's standard library is enough:
+Install the small Google News link-decoder dependency first:
 
 ```bash
+pip install -r requirements.txt
 export GEMINI_API_KEY="..."
 export TELEGRAM_BOT_TOKEN="..."
 export TELEGRAM_CHAT_ID="..."

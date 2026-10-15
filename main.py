@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date
+from datetime import date, timedelta
 
 from digest import create_digest, send_telegram
 from search import find_weekly_releases, search_google_news
+
+
+def most_recent_friday(today: date) -> date:
+    """Return Friday on or before today for a complete weekly digest window."""
+    return today - timedelta(days=(today.weekday() - 4) % 7)
 
 
 def main() -> None:
@@ -20,8 +25,8 @@ def main() -> None:
     parser.add_argument(
         "--end-date",
         type=date.fromisoformat,
-        default=date.today(),
-        help="Last day to include, in YYYY-MM-DD format (defaults to today).",
+        default=most_recent_friday(date.today()),
+        help="Last day to include, in YYYY-MM-DD format (defaults to the most recent Friday).",
     )
     parser.add_argument(
         "--raw",
@@ -41,6 +46,9 @@ def main() -> None:
             print(result["title"])
             print(result["url"])
             print()
+        return
+
+    if not results:
         return
 
     digest = create_digest(results, args.end_date)

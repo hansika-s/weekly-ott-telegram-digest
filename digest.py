@@ -20,11 +20,15 @@ def create_digest(results: list[dict[str, str]], end_date: date) -> str:
     start_date = end_date - timedelta(days=6)
     prompt = f"""Create a concise OTT release digest for {start_date:%d %b %Y}–{end_date:%d %b %Y}.
 
-Use only the supplied Google News leads. Include only notable films and scripted or animated
-series that clearly premiered in this date range. A title must be available on one of these
-services: Netflix, Prime Video, JioHotstar, Aha, ZEE5, Sun NXT, SonyLIV, Disney+, or Apple TV+.
-Omit anything uncertain, theatrical-only, documentary/reality/news content, or not released in
-the date window. Do not invent missing platform, language or dub information.
+Use the supplied article excerpts as evidence. Include a title only when the article text explicitly
+confirms that its streaming release date is within this date range and names an allowed platform.
+An article headline alone is never enough. Treat future tense, announcements, "release date",
+"when to watch", trailers, theatrical releases and rumours as unconfirmed unless the article text
+also explicitly says that the title is now streaming in this date range. Omit anything uncertain,
+including articles whose text could not be retrieved. Do not invent missing platform, language or
+dub information.
+
+Allowed platforms: Netflix, Prime Video, JioHotstar, Aha, ZEE5, Sun NXT, SonyLIV, Disney+, Apple TV+.
 
 Use this exact compact structure, omitting empty sections and languages:
 FILMS

@@ -20,12 +20,11 @@ def create_digest(results: list[dict[str, str]], end_date: date) -> str:
     start_date = end_date - timedelta(days=6)
     prompt = f"""Create a concise OTT release digest for {start_date:%d %b %Y}–{end_date:%d %b %Y}.
 
-The supplied Google News entries are leads, not evidence. Use Google Search grounding to verify
-each title's release date, platform, format, original language and dubs. Include only notable
-films and scripted or animated series that premiered in this date range. A title must be available
-on one of these services: Netflix, Prime Video, JioHotstar, Aha, ZEE5, Sun NXT, SonyLIV, Disney+,
-or Apple TV+. Omit anything uncertain, theatrical-only, documentary/reality/news content, or not
-released in the date window.
+Use only the supplied Google News leads. Include only notable films and scripted or animated
+series that clearly premiered in this date range. A title must be available on one of these
+services: Netflix, Prime Video, JioHotstar, Aha, ZEE5, Sun NXT, SonyLIV, Disney+, or Apple TV+.
+Omit anything uncertain, theatrical-only, documentary/reality/news content, or not released in
+the date window. Do not invent missing platform, language or dub information.
 
 Use this exact compact structure, omitting empty sections and languages:
 FILMS
@@ -48,7 +47,6 @@ Google News leads:
 
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
         "generationConfig": {"temperature": 0.1},
     }
     model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")

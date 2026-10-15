@@ -3,8 +3,8 @@
 A GitHub Actions project that sends a weekly OTT release digest to Telegram.
 
 It gathers Google News coverage for Telugu, Tamil, Hindi, Malayalam and English releases, asks
-Gemini to verify and format the shortlist, then sends the result to Telegram every Friday at 5 PM
-Berlin time.
+Gemini to classify and format the shortlist, then sends the result to Telegram every Friday at 5
+PM Berlin time.
 
 ## Setup
 

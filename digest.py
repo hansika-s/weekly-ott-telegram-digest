@@ -4,24 +4,42 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import date, timedelta
 import urllib.parse
 import urllib.request
 
 
-def create_digest(results: list[dict[str, str]]) -> str:
+def create_digest(results: list[dict[str, str]], end_date: date) -> str:
     """Use Gemini and Google Search grounding to turn release leads into a draft."""
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("Set GEMINI_API_KEY before generating a digest.")
 
-    prompt = """Create a concise OTT release digest from these Google News leads.
+    start_date = end_date - timedelta(days=6)
+    prompt = f"""Create a concise OTT release digest for {start_date:%d %b %Y}–{end_date:%d %b %Y}.
 
-Use Google Search grounding to verify claims before including them. Include only notable
-films and scripted or animated series. Organize the answer into FILMS and SERIES. Group
-Indian titles once under their verified original language (Telugu, Tamil, Hindi, or Malayalam)
-and list supported dubs separately. Group international English-language titles under English.
-For each title include only title, broad genre, and streaming platform. Do not mention sources,
-countries, research process, ratings, or services that have no release.
+The supplied Google News entries are leads, not evidence. Use Google Search grounding to verify
+each title's release date, platform, format, original language and dubs. Include only notable
+films and scripted or animated series that premiered in this date range. A title must be available
+on one of these services: Netflix, Prime Video, JioHotstar, Aha, ZEE5, Sun NXT, SonyLIV, Disney+,
+or Apple TV+. Omit anything uncertain, theatrical-only, documentary/reality/news content, or not
+released in the date window.
+
+Use this exact compact structure, omitting empty sections and languages:
+FILMS
+Telugu
+- Title — Genre — Platform
+  Dubs: language list (only when confirmed)
+
+SERIES
+English
+- Title — Genre — Platform
+
+Group Indian titles exactly once under their verified original language: Telugu, Tamil, Hindi, or
+Malayalam. Never repeat them under dubbed languages. Put English-language international titles
+under English. Include only title, broad genre and platform; Indian entries may additionally have
+the Dubs line. Do not include a country, rating, source, availability note, research comment,
+service list, introduction or conclusion.
 
 Google News leads:
 """ + json.dumps(results, ensure_ascii=False)

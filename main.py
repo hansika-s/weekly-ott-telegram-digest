@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 
 from digest import create_digest, send_telegram
-from search import search_google_news
+from search import find_weekly_releases, search_google_news
 
 
 def main() -> None:
@@ -13,8 +14,14 @@ def main() -> None:
     parser.add_argument(
         "query",
         nargs="?",
-        default="OTT releases Telugu Tamil Hindi Malayalam Netflix Prime Video",
+        default=None,
         help="Google News search query",
+    )
+    parser.add_argument(
+        "--end-date",
+        type=date.fromisoformat,
+        default=date.today(),
+        help="Last day to include, in YYYY-MM-DD format (defaults to today).",
     )
     parser.add_argument(
         "--raw",
@@ -27,7 +34,7 @@ def main() -> None:
         help="Send the completed digest to Telegram.",
     )
     args = parser.parse_args()
-    results = search_google_news(args.query)
+    results = search_google_news(args.query) if args.query else find_weekly_releases(args.end_date)
 
     if args.raw:
         for result in results:
@@ -36,7 +43,7 @@ def main() -> None:
             print()
         return
 
-    digest = create_digest(results)
+    digest = create_digest(results, args.end_date)
     print(digest)
     if args.send:
         send_telegram(digest)
